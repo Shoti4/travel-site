@@ -13,23 +13,52 @@ try {
 	// set the PDO error mode to exception
 	$conn -> setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-
-	// select all users
-	$query = "	SELECT 
-					students.*,
-				    gender.name AS gender_name
-				FROM students
-				INNER JOIN gender ON gender.id = students.gender_id";
-	$stmt = $conn -> query($query);
-
-	$students = $stmt -> fetchAll();
-
 } 
 catch(PDOException $e) {
 
 	echo "Connection failed: " . $e->getMessage();
 
 }
+
+
+
+
+
+
+
+$action = isset($_GET['action']) ? $_GET['action'] : '';
+
+if ($action == 'delete') {
+
+	$student_id = $_GET['student_id'];
+
+	// $query = "DELETE FROM students WHERE id = " . $student_id;
+	$query = "UPDATE students SET deleted = 1 WHERE id = " . $student_id;
+
+	$stmt = $conn -> query($query);
+
+}
+
+
+
+
+
+
+// select all users
+$query = "	SELECT 
+				students.*,
+			    gender.name AS gender_name
+			FROM students
+			INNER JOIN gender ON gender.id = students.gender_id
+			WHERE deleted = 0";
+$stmt = $conn -> query($query);
+
+$students = $stmt -> fetchAll();
+
+// echo '<pre>';
+// print_r($_GET);
+// echo '</pre>';
+
 
 ?><!DOCTYPE html>
 <html lang="en">
@@ -55,6 +84,7 @@ catch(PDOException $e) {
         <th>Mobile</th>
         <th>Birth Date</th>
         <th>Gender</th>
+        <th>DEL</th>
       </tr>
     </thead>
     <tbody>
@@ -71,6 +101,11 @@ catch(PDOException $e) {
 				<td><?=$student['mobile']?></td>
 				<td><?=$student['birth_date']?></td>
 				<td><?=$student['gender_name']?></td>
+				<td>
+					<a href="?action=delete&student_id=<?=$student['id']?>">
+						<img style="width: 25px; cursor: pointer;" src="icons/delete.png">
+					</a>
+				</td>
 			</tr>
     		<?php
     	}
